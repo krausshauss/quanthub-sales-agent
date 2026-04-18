@@ -9,7 +9,7 @@ window.CONFIG = {
 
   // ── Cloudflare Worker proxy URL ───────────────────────────────────
   // Your existing worker — we add new routes to it (see cloudflare-worker/index.js)
-  WORKER_URL: "https://salesagent.michael-20e.workers.dev",
+  WORKER_URL: "https://quanthub-sales-agent.michael-20e.workers.dev",
 
   // ── Logged-in rep ─────────────────────────────────────────────────
   // In production, pull this from your auth system (cookie, JWT, etc.)
