@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QuantHub · Sales Agent</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="src/css/main.css" />
 </head>
 <body>
@@ -16,7 +16,8 @@
     <!-- Header -->
     <header class="header">
       <div class="header-left">
-        <div class="logo">QH</div>
+        <img src="QuantHub Logos/qh-website-logo-2.svg" alt="QuantHub" class="header-logo">
+        <div class="header-sep"></div>
         <div>
           <div class="header-title">Sales Agent</div>
           <div class="header-sub" id="header-sub">Loading your day...</div>
@@ -40,9 +41,9 @@
       <div class="kpi-card" id="kpi-score">
         <div class="kpi-ring-wrap">
           <svg class="kpi-ring" viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="26" fill="none" stroke="#1e2027" stroke-width="5"/>
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#DDE4EF" stroke-width="5"/>
             <circle id="ring-fill" cx="32" cy="32" r="26" fill="none"
-              stroke="#818cf8" stroke-width="5" stroke-linecap="round"
+              stroke="#0077B5" stroke-width="5" stroke-linecap="round"
               stroke-dasharray="0 163.4" transform="rotate(-90 32 32)"
               style="transition: stroke-dasharray .8s ease"/>
           </svg>
@@ -111,7 +112,7 @@
       <div class="right-col">
 
         <!-- Activity Tracker -->
-        <section class="panel">
+        <section class="panel panel-activity">
           <div class="panel-header">
             <span class="panel-title">Activity Tracker · Today</span>
           </div>
@@ -125,7 +126,7 @@
         </section>
 
         <!-- Deal Velocity -->
-        <section class="panel">
+        <section class="panel panel-velocity">
           <div class="panel-header">
             <span class="panel-title">Deal Velocity · Pipeline</span>
           </div>
@@ -138,7 +139,7 @@
         </section>
 
         <!-- Lead Activity Feed -->
-        <section class="panel">
+        <section class="panel panel-leads">
           <div class="panel-header">
             <span class="panel-title">Lead Activity · Hot Signals</span>
             <span class="badge badge-new" id="lead-count-badge" style="display:none"></span>
