@@ -57,20 +57,19 @@ export default {
 
       // ── GET /hubspot/deals ───────────────────────────────────────
       if (path === "/hubspot/deals" && request.method === "GET") {
-        const owner  = url.searchParams.get("owner") || "";
-        const status = url.searchParams.get("status") || "open";
+        const owner   = url.searchParams.get("owner") || "";
         const ownerId = await resolveOwnerId(env, owner);
 
-        const filters = [];
-        if (ownerId) filters.push({ propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId });
-        if (status === "open") {
-          filters.push({ propertyName: "hs_is_closed", operator: "EQ", value: "false" });
-        }
+        // Filter by owner only — frontend filters out closed stages by name.
+        // Avoids hs_is_closed inconsistencies across HubSpot account configs.
+        const filters = ownerId
+          ? [{ propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId }]
+          : [];
 
         const data = await hsPost(env, "/crm/v3/objects/deals/search", {
           filterGroups: [{ filters }],
           properties: [
-            "dealname", "amount", "dealstage", "closedate",
+            "dealname", "amount", "dealstage", "pipeline", "closedate",
             "hubspot_owner_id", "notes_last_updated", "hs_lastmodifieddate",
             "hs_deal_stage_probability", "hs_is_closed",
           ],
@@ -198,10 +197,49 @@ export default {
         }
       }
 
+      // ── GET /hubspot/stages ──────────────────────────────────────
+      // Returns { stageId: "Stage Label", ... } for deals + leads pipelines
+      if (path === "/hubspot/stages" && request.method === "GET") {
+        const [dealPipelines, leadPipelines] = await Promise.allSettled([
+          hsGet(env, "/crm/v3/pipelines/deals"),
+          hsGet(env, "/crm/v3/pipelines/leads"),
+        ]);
+        const stageMap = {};
+        for (const result of [dealPipelines, leadPipelines]) {
+          if (result.status !== "fulfilled") continue;
+          for (const pipeline of (result.value.results || [])) {
+            for (const stage of (pipeline.stages || [])) {
+              stageMap[stage.id] = stage.label;
+            }
+          }
+        }
+        return json(stageMap, 200, corsHeaders);
+      }
+
       // ── GET /hubspot/owners ──────────────────────────────────────
       if (path === "/hubspot/owners" && request.method === "GET") {
         const data = await hsGet(env, "/crm/v3/owners/?limit=100");
         return json(data, 200, corsHeaders);
+      }
+
+      // ── POST /hubspot/activity ───────────────────────────────────
+      // Log a completed task (priority action checked off by rep)
+      if (path === "/hubspot/activity" && request.method === "POST") {
+        const body  = await request.json();
+        const { title, detail, ownerEmail } = body;
+        const ownerId = await resolveOwnerId(env, ownerEmail);
+
+        const taskProps = {
+          hs_task_subject: title || "Priority action completed",
+          hs_task_body:    detail || "",
+          hs_task_status:  "COMPLETED",
+          hs_task_type:    "TODO",
+          hs_timestamp:    new Date().toISOString(),
+        };
+        if (ownerId) taskProps.hubspot_owner_id = ownerId;
+
+        const task = await hsPost(env, "/crm/v3/objects/tasks", { properties: taskProps });
+        return json({ ok: true, id: task.id }, 200, corsHeaders);
       }
 
       // ── POST /slack/digest ───────────────────────────────────────
